@@ -30,9 +30,9 @@ class InvoiceService
 
     public function update($invoice, $dto)
     {
-        $products = $dto['products'];
+        $products = $dto->products;
 
-        unset($dto['products']);
+        unset($dto->products);
 
         $productIds = $this->getUpdatedProductIds($products);
 

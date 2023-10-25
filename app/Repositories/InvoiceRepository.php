@@ -11,9 +11,6 @@ use SebastianBergmann\Diff\Exception;
 
 class InvoiceRepository
 {
-    public function __construct(private InvoiceService $service)
-    {
-    }
 
     public function store($dto, $productIds, $paid_date)
     {
