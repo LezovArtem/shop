@@ -6,9 +6,8 @@ namespace App\Repositories;
 
 use App\Models\User;
 
-class UserRepository
+final class UserRepository
 {
-
     public function store($dto)
     {
         $user = User::create([
@@ -39,5 +38,4 @@ class UserRepository
 
         return $user;
     }
-
 }

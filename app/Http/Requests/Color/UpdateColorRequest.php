@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Color;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateColorRequest extends FormRequest
+final class UpdateColorRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

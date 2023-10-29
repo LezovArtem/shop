@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\V1;
 
 use App\DTO\Factories\InvoiceDtoFactory;
@@ -11,8 +13,10 @@ use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 use App\Http\Resources\Invoice\InvoiceResource;
 use App\Services\InvoiceService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-class InvoiceController extends Controller
+final class InvoiceController extends Controller
 {
     public function __construct(private InvoiceService $invoiceService)
     {
@@ -21,16 +25,16 @@ class InvoiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $filter = new InvoiceFilter();
         $queryItems = $filter->transform($request);
 
         if (empty($queryItems)){
-            return InvoiceResource::collection(Invoice::paginate());
+            return response()->json(InvoiceResource::collection(Invoice::paginate()), Response::HTTP_OK);
         } else {
             $invoices = Invoice::where($queryItems)->paginate();
-            return InvoiceResource::collection($invoices->appends($request->query()));
+            return response()->json(InvoiceResource::collection($invoices->appends($request->query())), Response::HTTP_OK);
         }
     }
 
@@ -51,7 +55,7 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        return new InvoiceResource($invoice);
+        return response()->json(new InvoiceResource($invoice), Response::HTTP_OK);
     }
 
     /**
@@ -69,8 +73,9 @@ class InvoiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Invoice $invoice)
+    public function destroy(Invoice $invoice): Response
     {
         $invoice->delete();
+        return response()->noContent();
     }
 }

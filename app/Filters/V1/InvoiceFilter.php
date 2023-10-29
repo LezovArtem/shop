@@ -6,7 +6,7 @@ namespace App\Filters\V1;
 
 use App\Filters\ApiFilter;
 
-class InvoiceFilter extends ApiFilter
+final class InvoiceFilter extends ApiFilter
 {
     protected $safeParms = [
       'id' => ['eq', 'gt', 'lt', 'gte', 'lte'],

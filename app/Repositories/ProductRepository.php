@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Product;
-use App\Services\ProductService;
 use Illuminate\Support\Facades\DB;
 
-class ProductRepository
+final class ProductRepository
 {
-
     public function store($dto, $tagIds, $colorIds, $categoryId)
     {
         try {

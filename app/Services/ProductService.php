@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Color;
-use App\Models\Product;
 use App\Models\Tag;
 use App\Repositories\ProductRepository;
 

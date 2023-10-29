@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
@@ -7,54 +9,54 @@ use App\Http\Requests\Color\StoreColorRequest;
 use App\Http\Requests\Color\UpdateColorRequest;
 use App\Http\Resources\Color\ColorResource;
 use App\Models\Color;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-class ColorController extends Controller
+final class ColorController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $colors = Color::all();
-
-        return ColorResource::collection($colors);
+        return response()->json(ColorResource::collection(Color::all()), Response::HTTP_OK);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreColorRequest $request)
+    public function store(StoreColorRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        $color = Color::create($request->validated());
 
-        return new ColorResource(Color::create($data));
+        return response()->json(new ColorResource($color), Response::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Color $color)
+    public function show(Color $color): JsonResponse
     {
-        return new ColorResource($color);
+        return response()->json(new ColorResource($color), Response::HTTP_OK);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateColorRequest $request, Color $color)
+    public function update(UpdateColorRequest $request, Color $color): JsonResponse
     {
-        $data = $request->validated();
+        $color->update($request->validated());
 
-        $color->update($data);
-
-        return $this->show($color);
+        return response()->json($this->show($color), Response::HTTP_OK);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Color $color)
+    public function destroy(Color $color): Response
     {
         $color->delete();
+
+        return response()->noContent();
     }
 }

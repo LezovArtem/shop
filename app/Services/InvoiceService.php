@@ -7,7 +7,7 @@ namespace App\Services;
 use App\Models\Product;
 use App\Repositories\InvoiceRepository;
 
-class InvoiceService
+final class InvoiceService
 {
     public function __construct(private InvoiceRepository $invoiceRepository)
     {

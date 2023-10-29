@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\V1;
 
 use App\DTO\Factories\ProductDtoFactory;
@@ -11,8 +13,10 @@ use App\Http\Resources\Product\ProductResource;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-class ProductController extends Controller
+final class ProductController extends Controller
 {
     public function __construct(private ProductService $productService)
     {
@@ -21,17 +25,17 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $filter = new ProductFilter();
         $queryItems = $filter->transform($request);
 
         if (empty($queryItems)){
-            return ProductResource::collection(Product::paginate());
+            return response()->json(ProductResource::collection(Product::paginate()), Response::HTTP_OK);
         } else {
             $products = Product::where($queryItems)->paginate();
 
-            return ProductResource::collection($products->appends($request->query()));
+            return response()->json(ProductResource::collection($products->appends($request->query())), Response::HTTP_OK);
         }
     }
 
@@ -50,9 +54,9 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show(Product $product): JsonResponse
     {
-        return new ProductResource($product);
+        return response()->json(new ProductResource($product), Response::HTTP_OK);
     }
 
     /**
@@ -70,8 +74,9 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy(Product $product): Response
     {
         $product->delete();
+        return response()->noContent();
     }
 }

@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Invoice;
-use App\Services\InvoiceService;
 use Illuminate\Support\Facades\DB;
 use SebastianBergmann\Diff\Exception;
 
-class InvoiceRepository
+final class InvoiceRepository
 {
 
     public function store($dto, $productIds, $paid_date)

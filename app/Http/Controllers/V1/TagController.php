@@ -9,35 +9,35 @@ use App\Http\Requests\Tag\StoreTagRequest;
 use App\Http\Requests\Tag\UpdateTagRequest;
 use App\Http\Resources\Tag\TagResource;
 use App\Models\Tag;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 final class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $tags = Tag::all();
-
-        return TagResource::collection($tags);
+        return response()->json(TagResource::collection(Tag::all()), Response::HTTP_OK);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTagRequest $request)
+    public function store(StoreTagRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        $tag = Tag::create($request->validated());
 
-        return new TagResource(Tag::create($data));
+        return response()->json(new TagResource($tag), Response::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Tag $tag)
+    public function show(Tag $tag): JsonResponse
     {
-        return new TagResource($tag);
+        return response()->json(new TagResource($tag), Response::HTTP_OK);
     }
 
     /**
@@ -45,18 +45,18 @@ final class TagController extends Controller
      */
     public function update(UpdateTagRequest $request, Tag $tag)
     {
-        $data = $request->validated();
+        $tag->update($request->validated());
 
-        $tag->update($data);
-
-        return $this->show($tag);
+        return response()->json($this->show($tag), Response::HTTP_OK);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Tag $tag)
+    public function destroy(Tag $tag): Response
     {
         $tag->delete();
+
+        return response()->noContent();
     }
 }

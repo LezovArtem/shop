@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\V1;
 
 use App\Http\Controllers\Controller;
@@ -7,52 +9,53 @@ use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\Category\CategoryResource;
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-class CategoryController extends Controller
+final class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $categories = Category::all();
-
-        return CategoryResource::collection($categories);
+        return response()->json(CategoryResource::collection(Category::all()), Response::HTTP_OK);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryRequest $request): JsonResponse
     {
-        $data = $request->validated();
-
-        return new CategoryResource(Category::create($data));
+        $category = Category::create($request->validated());
+        return response()->json(new CategoryResource($category), Response::HTTP_CREATED);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(Category $category): JsonResponse
     {
-        return new CategoryResource($category);
+        return response()->json(new CategoryResource($category), Response::HTTP_OK);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCategoryRequest $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category): JsonResponse
     {
-        $data = $request->validated();
+        $category->update($request->validated());
 
-        $category->update($data);
+        return response()->json($this->show($category), Response::HTTP_OK);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Category $category): Response
     {
         $category->delete();
+
+        return response()->noContent();
     }
 }
