@@ -5,9 +5,24 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final class UserRepository
 {
+    public function getAll(): LengthAwarePaginator
+    {
+        $users = User::paginate();
+
+        return $users;
+    }
+
+    public function withQueryItems($queryItems): LengthAwarePaginator
+    {
+        $users = User::where($queryItems)->paginate();
+
+        return $users;
+    }
+
     public function store($dto)
     {
         $user = User::create([

@@ -22,55 +22,52 @@ final class UserController extends Controller
     {
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): JsonResponse
     {
         $filter = new UserFilter();
         $queryItems = $filter->transform($request);
 
+        $users = $this->userRepository->getAll();
+
         if (empty($queryItems)){
-            return response()->json(UserResource::collection(User::paginate()), Response::HTTP_OK);
+            return response()->json(UserResource::collection($users), Response::HTTP_OK);
         } else {
-            $users = User::where($queryItems)->paginate();
+            $users = $this->userRepository->withQueryItems($queryItems);
+
             return response()->json(UserResource::collection($users->appends($request->query())), Response::HTTP_OK);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreUserRequest $request, UserDtoFactory $dtoFactory): JsonResponse
     {
         $dto = $dtoFactory->createFromRequest($request);
 
-        $user = $this->userRepository->store($dto);
+        try {
+            $user = $this->userRepository->store($dto);
+        } catch (\Exception $exception) {
+            return $exception->getMessage();
+        }
 
         return response()->json(new UserResource($user), Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user): JsonResponse
     {
         return response()->json(new UserResource($user), Response::HTTP_OK);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateUserRequest $request, User $user, UserDtoFactory $dtoFactory): JsonResponse
     {
         $dto = $dtoFactory->createFromRequest($request);
-        $user = $this->userRepository->update($user, $dto);
+        try {
+            $user = $this->userRepository->update($user, $dto);
+        } catch (\Exception $exception) {
+            $exception->getMessage();
+        }
+
         return response()->json(new UserResource($user), Response::HTTP_OK);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user): Response
     {
         $user->delete();

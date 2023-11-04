@@ -11,6 +11,7 @@ use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\Product\ProductResource;
 use App\Models\Product;
+use App\Repositories\ProductRepository;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,65 +19,61 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class ProductController extends Controller
 {
-    public function __construct(private ProductService $productService)
+    public function __construct(private ProductService $productService, private ProductRepository $productRepository)
     {
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): JsonResponse
     {
         $filter = new ProductFilter();
         $queryItems = $filter->transform($request);
 
+        $products = $this->productRepository->getAll();
+
         if (empty($queryItems)){
-            return response()->json(ProductResource::collection(Product::paginate()), Response::HTTP_OK);
+            return response()->json(ProductResource::collection($products), Response::HTTP_OK);
         } else {
-            $products = Product::where($queryItems)->paginate();
+            $products = $this->productRepository->withQueryItems($queryItems);
 
             return response()->json(ProductResource::collection($products->appends($request->query())), Response::HTTP_OK);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreProductRequest $request, ProductDtoFactory $dtoFactory)
+    public function store(StoreProductRequest $request, ProductDtoFactory $dtoFactory): JsonResponse
     {
         $dto = $dtoFactory->createFromRequest($request);
 
-        $product = $this->productService->store($dto);
+        try {
+            $product = $this->productService->store($dto);
+        } catch (\Exception $exception){
+            return $exception->getMessage();
+        }
 
-        return $product instanceof Product ? new ProductResource($product) : $product;
+        return response()->json(new ProductResource($product), Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Product $product): JsonResponse
     {
         return response()->json(new ProductResource($product), Response::HTTP_OK);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateProductRequest $request, Product $product, ProductDtoFactory $dtoFactory)
+    public function update(UpdateProductRequest $request, Product $product, ProductDtoFactory $dtoFactory): JsonResponse
     {
         $dto = $dtoFactory->createFromRequest($request);
 
-        $product = $this->productService->update($product, $dto);
+        try {
+            $product = $this->productService->update($product, $dto);
+        } catch (\Exception $exception){
+            return $exception->getMessage();
+        }
 
-        return $product instanceof Product ? new ProductResource($product) : $product;
+        return response()->json(new ProductResource($product), Response::HTTP_OK);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Product $product): Response
     {
         $product->delete();
+
         return response()->noContent();
     }
 }

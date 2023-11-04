@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Color;
+use App\Models\Product;
 use App\Models\Tag;
 use App\Repositories\ProductRepository;
 
@@ -15,7 +16,7 @@ final class ProductService
     {
     }
 
-    public function store($dto)
+    public function store($dto): Product
     {
         $tags = $dto->tags;
         $category = $dto->category;
@@ -30,21 +31,22 @@ final class ProductService
         return $this->productRepository->store($dto, $tagIds, $colorIds, $categoryId);
     }
 
-    public function update($product, $data){
-        $category = $data['category'];
-        $tags = $data['tags'];
-        $colors = $data['colors'];
+    public function update($product, $dto): Product
+    {
+        $category = $dto->category;
+        $tags = $dto->tags;
+        $colors = $dto->colors;
 
-        unset($data['category'], $data['tags'] ,$data['colors']);
+        unset($dto->category, $dto->tags ,$dto->colors);
 
         $tagIds = $this->getUpdatedTagIds($tags);
         $colorIds = $this->getUpdatedColorIds($colors);
         $categoryId = $this->getUpdatedCategoryId($category);
 
-        return $this->productRepository->update($product, $data, $tagIds, $colorIds, $categoryId);
+        return $this->productRepository->update($product, $dto, $tagIds, $colorIds, $categoryId);
     }
 
-    private function getCategoryId($item)
+    private function getCategoryId($item): int
     {
         if (isset($item['id'])){
             $category = Category::find($item['id']);
@@ -56,7 +58,7 @@ final class ProductService
     }
 
 
-    private function getTagIds($tags)
+    private function getTagIds($tags): array
     {
         $tagIds = [];
 
@@ -74,7 +76,7 @@ final class ProductService
         return $tagIds;
     }
 
-    private function getColorIds($colors)
+    private function getColorIds($colors): array
     {
         $colorIds = [];
 
@@ -92,7 +94,7 @@ final class ProductService
         return $colorIds;
     }
 
-    private function getUpdatedCategoryId($item)
+    private function getUpdatedCategoryId($item): int
     {
         if (isset($item['id'])){
             $category = Category::find($item['id']);
@@ -104,7 +106,8 @@ final class ProductService
         return $category->id;
     }
 
-    private function getUpdatedTagIds($tags){
+    private function getUpdatedTagIds($tags): array
+    {
         $tagIds = [];
 
         foreach ($tags as $tag) {
@@ -121,7 +124,8 @@ final class ProductService
         return $tagIds;
     }
 
-    private function getUpdatedColorIds($colors){
+    private function getUpdatedColorIds($colors): array
+    {
         $colorIds = [];
 
         foreach ($colors as $color) {

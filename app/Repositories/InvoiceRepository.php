@@ -5,57 +5,51 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Invoice;
-use Illuminate\Support\Facades\DB;
-use SebastianBergmann\Diff\Exception;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final class InvoiceRepository
 {
-
-    public function store($dto, $productIds, $paid_date)
+    public function getAll(): LengthAwarePaginator
     {
-            try {
-                DB::beginTransaction();
+        $invoices = Invoice::paginate();
 
-                $invoice = Invoice::create([
-                    'user_id' => $dto->user_id,
-                    'amount' => $dto->amount,
-                    'status' => $dto->status,
-                    'billed_date' => now()->toDateTimeString(),
-                    'paid_date' => $paid_date,
-                ]);
+        return $invoices;
+    }
 
-                $invoice->products()->attach($productIds);
+    public function withQueryItems($queryItems): LengthAwarePaginator
+    {
+        $invoices = Invoice::where($queryItems)->paginate();
 
-                DB::commit();
-            } catch (Exception $exception){
-                DB::rollBack();
+        return $invoices;
+    }
 
-                return $exception->getMessage();
-            }
+    public function store($dto, $productIds, $paid_date): Invoice
+    {
+
+        $invoice = Invoice::create([
+            'user_id' => $dto->user_id,
+            'amount' => $dto->amount,
+            'status' => $dto->status,
+            'billed_date' => now()->toDateTimeString(),
+            'paid_date' => $paid_date,
+        ]);
+
+        $invoice->products()->attach($productIds);
+
         return $invoice;
     }
 
-    public function update($invoice, $dto, $productIds)
+    public function update($invoice, $dto, $productIds): Invoice
     {
-        try {
-            DB::beginTransaction();
+        $invoice->update([
+            'user_id' => $dto->user_id,
+            'amount' => $dto->amount,
+            'status' => $dto->status,
+            'billed_date' => $dto->billed_date,
+            'paid_date' => $dto->paid_date,
+        ]);
 
-            $invoice->update([
-                'user_id' => $dto->user_id,
-                'amount' => $dto->amount,
-                'status' => $dto->status,
-                'billed_date' => $dto->billed_date,
-                'paid_date' => $dto->paid_date,
-            ]);
-
-            $invoice->products()->sync($productIds);
-
-            DB::commit();
-
-        } catch (\Exception $exception){
-            DB::rollBack();
-            return $exception->getMessage();
-        }
+        $invoice->products()->sync($productIds);
 
         return $invoice->fresh();
     }

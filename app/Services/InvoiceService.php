@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Repositories\InvoiceRepository;
 
@@ -13,7 +14,7 @@ final class InvoiceService
     {
     }
 
-    public function store($dto)
+    public function store($dto): Invoice
     {
         $products = $dto->products;
         unset($dto->products);
@@ -25,10 +26,11 @@ final class InvoiceService
         } else {
             $paid_date = $dto->paid_date;
         }
+
         return $this->invoiceRepository->store($dto, $productIds, $paid_date);
     }
 
-    public function update($invoice, $dto)
+    public function update($invoice, $dto): Invoice
     {
         $products = $dto->products;
 
@@ -39,7 +41,8 @@ final class InvoiceService
         return $this->invoiceRepository->update($invoice, $dto, $productIds);
     }
 
-    private function getproductIds($products){
+    private function getproductIds($products): array
+    {
         $productIds = [];
 
         foreach ($products as $product){
@@ -48,10 +51,12 @@ final class InvoiceService
             }
             $productIds[] = $product->id;
         }
+
         return $productIds;
     }
 
-    private function getUpdatedProductIds($products){
+    private function getUpdatedProductIds($products): array
+    {
         $productIds = [];
 
         foreach ($products as $product) {

@@ -4,54 +4,52 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\V1;
 
+use App\DTO\Factories\CategoryDtoFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\Category\CategoryResource;
 use App\Models\Category;
+use App\Repositories\CategoryRepository;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CategoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): JsonResponse
+    public function __construct(private CategoryRepository $categoryRepository)
     {
-        return response()->json(CategoryResource::collection(Category::all()), Response::HTTP_OK);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCategoryRequest $request): JsonResponse
+    public function index(): JsonResponse
     {
-        $category = Category::create($request->validated());
+        $categories = $this->categoryRepository->getAll();
+
+        return response()->json(CategoryResource::collection($categories), Response::HTTP_OK);
+    }
+
+    public function store(StoreCategoryRequest $request, CategoryDtoFactory $dtoFactory): JsonResponse
+    {
+        $dto = $dtoFactory->createFromRequest($request->validated());
+
+        $category = Category::create($dto->title);
+
         return response()->json(new CategoryResource($category), Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Category $category): JsonResponse
     {
         return response()->json(new CategoryResource($category), Response::HTTP_OK);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCategoryRequest $request, Category $category): JsonResponse
+    public function update(UpdateCategoryRequest $request, Category $category, CategoryDtoFactory $dtoFactory): JsonResponse
     {
-        $category->update($request->validated());
+        $dto = $dtoFactory->createFromRequest($request->validated());
+
+        $category->update([$dto->title]);
 
         return response()->json($this->show($category), Response::HTTP_OK);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category): Response
     {
         $category->delete();
