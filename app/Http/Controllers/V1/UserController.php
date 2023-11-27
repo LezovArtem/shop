@@ -45,7 +45,7 @@ final class UserController extends Controller
         try {
             $user = $this->userRepository->store($dto);
         } catch (\Exception $exception) {
-            return $exception->getMessage();
+            return response()->json($exception->getMessage());
         }
 
         return response()->json(new UserResource($user), Response::HTTP_CREATED);
@@ -62,7 +62,7 @@ final class UserController extends Controller
         try {
             $user = $this->userRepository->update($user, $dto);
         } catch (\Exception $exception) {
-            $exception->getMessage();
+            return response()->json($exception->getMessage());
         }
 
         return response()->json(new UserResource($user), Response::HTTP_OK);

@@ -46,7 +46,7 @@ final class ProductController extends Controller
         try {
             $product = $this->productService->store($dto);
         } catch (\Exception $exception){
-            return $exception->getMessage();
+            return response()->json($exception->getMessage());
         }
 
         return response()->json(new ProductResource($product), Response::HTTP_CREATED);
@@ -64,7 +64,7 @@ final class ProductController extends Controller
         try {
             $product = $this->productService->update($product, $dto);
         } catch (\Exception $exception){
-            return $exception->getMessage();
+            return response()->json($exception->getMessage());
         }
 
         return response()->json(new ProductResource($product), Response::HTTP_OK);

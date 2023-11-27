@@ -47,7 +47,7 @@ final class InvoiceController extends Controller
         try {
             $invoice = $this->invoiceService->store($dto);
         } catch (Exception $exception){
-            return $exception->getMessage();
+            return response()->json($exception->getMessage());
         }
 
         return response()->json(new InvoiceResource($invoice), Response::HTTP_OK);
@@ -65,7 +65,7 @@ final class InvoiceController extends Controller
         try {
             $invoice = $this->invoiceService->update($invoice, $dto);
         } catch (Exception $exception){
-            return $exception->getMessage();
+            return response()->json($exception->getMessage());
         }
 
         return response()->json(new InvoiceResource($invoice), Response::HTTP_OK);

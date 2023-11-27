@@ -36,7 +36,7 @@ final class ProductRepository
        $product->tags()->attach($tagIds);
        $product->colors()->attach($colorIds);
 
-        return $product;
+       return $product;
     }
 
 
